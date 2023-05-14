@@ -25,6 +25,7 @@ class JUGADOR(pygame.sprite.Sprite):
         self.pos = MATRIZ((10, 580))  # MIN y MAX posiciones del jugador
         self.vel = MATRIZ(0,0) #Velocidad
         self.acc = MATRIZ(0,0) #Aceleracion
+        self.jumping = False
     def MOVER(self):
         self.acc = MATRIZ(0,0.5)
         pressed_keys = pygame.key.get_pressed()
@@ -49,9 +50,15 @@ class JUGADOR(pygame.sprite.Sprite):
 
     def SALTAR(self):
         COLISION = pygame.sprite.spritecollide(self, PLATAFORMAS, False)
-        if COLISION:
+        if COLISION and not self.jumping:
+            self.jumping = True
             self.vel.y = -15
     
+    def CANCELA_SALTO(self):
+        if self.jumping:
+            if self.vel.y < -3:
+                self.vel.y = -3
+
     def ACTUALIZAR(self):
         COLISION = pygame.sprite.spritecollide(P1,PLATAFORMAS, False)
         if P1.vel.y > 0:
@@ -70,7 +77,7 @@ class PLATAFORMA(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect(center = (random.randint(0,ANCHO-10), random.randint(0, ALTO-30)))
     def MOVER(self):
         pass
-    
+
 def plat_gen():
     while len(PLATAFORMAS) < 7 :
         width = random.randrange(50,100)
@@ -112,6 +119,10 @@ while True:
         if event.type == pygame.KEYDOWN:    
             if event.key == pygame.K_SPACE:
                 P1.SALTAR()
+        if event.type == pygame.KEYUP:    
+            if event.key == pygame.K_SPACE:
+                P1.CANCELA_SALTO() 
+        
 
     if P1.rect.top <= ALTO / 3:
         P1.pos.y += abs(P1.vel.y)
